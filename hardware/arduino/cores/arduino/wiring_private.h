@@ -25,22 +25,13 @@
 #ifndef WiringPrivate_h
 #define WiringPrivate_h
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "Arduino.h"
+#include "arduino_.h"
 
 #ifdef __cplusplus
 extern "C"{
-#endif
-
-#ifndef cbi
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#endif
-#ifndef sbi
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
 #define EXTERNAL_INT_0 0

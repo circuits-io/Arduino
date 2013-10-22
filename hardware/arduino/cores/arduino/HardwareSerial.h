@@ -27,37 +27,32 @@
 
 #include "Stream.h"
 
-struct ring_buffer;
+// Define board type
+#define UBRRH
+#define UBRRL
+
+#define SERIAL_BUFFER_SIZE 1000
+
+struct ring_buffer
+{
+  unsigned char buffer[SERIAL_BUFFER_SIZE];
+  volatile unsigned int head;
+  volatile unsigned int tail;
+};
 
 class HardwareSerial : public Stream
 {
   private:
     ring_buffer *_rx_buffer;
-    ring_buffer *_tx_buffer;
-    volatile uint8_t *_ubrrh;
-    volatile uint8_t *_ubrrl;
-    volatile uint8_t *_ucsra;
-    volatile uint8_t *_ucsrb;
-    volatile uint8_t *_ucsrc;
-    volatile uint8_t *_udr;
-    uint8_t _rxen;
-    uint8_t _txen;
-    uint8_t _rxcie;
-    uint8_t _udrie;
-    uint8_t _u2x;
-    bool transmitting;
+    int _serial_nr;
   public:
-    HardwareSerial(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
-      volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
-      volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
-      volatile uint8_t *ucsrc, volatile uint8_t *udr,
-      uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x);
+    HardwareSerial(ring_buffer *rx_buffer, int serial_nr);
     void begin(unsigned long);
     void begin(unsigned long, uint8_t);
     void end();
-    virtual int available(void);
-    virtual int peek(void);
-    virtual int read(void);
+    inline virtual int available(void) __attribute__((always_inline));
+    inline virtual int peek(void) __attribute__((always_inline));
+    inline virtual int read(void) __attribute__((always_inline));
     virtual void flush(void);
     virtual size_t write(uint8_t);
     inline size_t write(unsigned long n) { return write((uint8_t)n); }
@@ -66,33 +61,8 @@ class HardwareSerial : public Stream
     inline size_t write(int n) { return write((uint8_t)n); }
     using Print::write; // pull in write(str) and write(buf, size) from Print
     operator bool();
+    void store_char(unsigned char c);
 };
-
-// Define config for Serial.begin(baud, config);
-#define SERIAL_5N1 0x00
-#define SERIAL_6N1 0x02
-#define SERIAL_7N1 0x04
-#define SERIAL_8N1 0x06
-#define SERIAL_5N2 0x08
-#define SERIAL_6N2 0x0A
-#define SERIAL_7N2 0x0C
-#define SERIAL_8N2 0x0E
-#define SERIAL_5E1 0x20
-#define SERIAL_6E1 0x22
-#define SERIAL_7E1 0x24
-#define SERIAL_8E1 0x26
-#define SERIAL_5E2 0x28
-#define SERIAL_6E2 0x2A
-#define SERIAL_7E2 0x2C
-#define SERIAL_8E2 0x2E
-#define SERIAL_5O1 0x30
-#define SERIAL_6O1 0x32
-#define SERIAL_7O1 0x34
-#define SERIAL_8O1 0x36
-#define SERIAL_5O2 0x38
-#define SERIAL_6O2 0x3A
-#define SERIAL_7O2 0x3C
-#define SERIAL_8O2 0x3E
 
 #if defined(UBRRH) || defined(UBRR0H)
   extern HardwareSerial Serial;
@@ -109,6 +79,32 @@ class HardwareSerial : public Stream
 #if defined(UBRR3H)
   extern HardwareSerial Serial3;
 #endif
+
+int HardwareSerial::available(void)
+{
+  return (unsigned int)(SERIAL_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) % SERIAL_BUFFER_SIZE;
+}
+
+int HardwareSerial::peek(void)
+{
+  if (_rx_buffer->head == _rx_buffer->tail) {
+    return -1;
+  } else {
+    return _rx_buffer->buffer[_rx_buffer->tail];
+  }
+}
+
+int HardwareSerial::read(void)
+{
+  // if the head isn't ahead of the tail, we don't have any characters
+  if (_rx_buffer->head == _rx_buffer->tail) {
+    return -1;
+  } else {
+    unsigned char c = _rx_buffer->buffer[_rx_buffer->tail];
+    _rx_buffer->tail = (unsigned int)(_rx_buffer->tail + 1) % SERIAL_BUFFER_SIZE;
+    return c;
+  }
+}
 
 extern void serialEventRun(void) __attribute__((weak));
 

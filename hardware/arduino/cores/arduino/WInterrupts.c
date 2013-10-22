@@ -32,6 +32,8 @@
 
 #include "wiring_private.h"
 
+// TODO !
+
 static volatile voidFuncPtr intFunc[EXTERNAL_NUM_INTERRUPTS];
 // volatile static voidFuncPtr twiIntFunc;
 
@@ -229,106 +231,3 @@ void detachInterrupt(uint8_t interruptNum) {
     intFunc[interruptNum] = 0;
   }
 }
-
-/*
-void attachInterruptTwi(void (*userFunc)(void) ) {
-  twiIntFunc = userFunc;
-}
-*/
-
-#if defined(__AVR_ATmega32U4__)
-ISR(INT0_vect) {
-	if(intFunc[EXTERNAL_INT_0])
-		intFunc[EXTERNAL_INT_0]();
-}
-
-ISR(INT1_vect) {
-	if(intFunc[EXTERNAL_INT_1])
-		intFunc[EXTERNAL_INT_1]();
-}
-
-ISR(INT2_vect) {
-    if(intFunc[EXTERNAL_INT_2])
-		intFunc[EXTERNAL_INT_2]();
-}
-
-ISR(INT3_vect) {
-    if(intFunc[EXTERNAL_INT_3])
-		intFunc[EXTERNAL_INT_3]();
-}
-
-ISR(INT6_vect) {
-    if(intFunc[EXTERNAL_INT_4])
-		intFunc[EXTERNAL_INT_4]();
-}
-
-#elif defined(EICRA) && defined(EICRB)
-
-ISR(INT0_vect) {
-  if(intFunc[EXTERNAL_INT_2])
-    intFunc[EXTERNAL_INT_2]();
-}
-
-ISR(INT1_vect) {
-  if(intFunc[EXTERNAL_INT_3])
-    intFunc[EXTERNAL_INT_3]();
-}
-
-ISR(INT2_vect) {
-  if(intFunc[EXTERNAL_INT_4])
-    intFunc[EXTERNAL_INT_4]();
-}
-
-ISR(INT3_vect) {
-  if(intFunc[EXTERNAL_INT_5])
-    intFunc[EXTERNAL_INT_5]();
-}
-
-ISR(INT4_vect) {
-  if(intFunc[EXTERNAL_INT_0])
-    intFunc[EXTERNAL_INT_0]();
-}
-
-ISR(INT5_vect) {
-  if(intFunc[EXTERNAL_INT_1])
-    intFunc[EXTERNAL_INT_1]();
-}
-
-ISR(INT6_vect) {
-  if(intFunc[EXTERNAL_INT_6])
-    intFunc[EXTERNAL_INT_6]();
-}
-
-ISR(INT7_vect) {
-  if(intFunc[EXTERNAL_INT_7])
-    intFunc[EXTERNAL_INT_7]();
-}
-
-#else
-
-ISR(INT0_vect) {
-  if(intFunc[EXTERNAL_INT_0])
-    intFunc[EXTERNAL_INT_0]();
-}
-
-ISR(INT1_vect) {
-  if(intFunc[EXTERNAL_INT_1])
-    intFunc[EXTERNAL_INT_1]();
-}
-
-#if defined(EICRA) && defined(ISC20)
-ISR(INT2_vect) {
-  if(intFunc[EXTERNAL_INT_2])
-    intFunc[EXTERNAL_INT_2]();
-}
-#endif
-
-#endif
-
-/*
-ISR(TWI_vect) {
-  if(twiIntFunc)
-    twiIntFunc();
-}
-*/
-

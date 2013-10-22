@@ -23,14 +23,12 @@
   $Id$
 */
 
-extern "C" {
-  #include "stdlib.h"
-}
+#include <stdlib.h>
 
 void randomSeed(unsigned int seed)
 {
   if (seed != 0) {
-    srandom(seed);
+    srand(seed);
   }
 }
 
@@ -39,7 +37,7 @@ long random(long howbig)
   if (howbig == 0) {
     return 0;
   }
-  return random() % howbig;
+  return rand() % howbig;
 }
 
 long random(long howsmall, long howbig)
@@ -48,7 +46,7 @@ long random(long howsmall, long howbig)
     return howsmall;
   }
   long diff = howbig - howsmall;
-  return random(diff) + howsmall;
+  return rand()%diff + howsmall;
 }
 
 long map(long x, long in_min, long in_max, long out_min, long out_max)

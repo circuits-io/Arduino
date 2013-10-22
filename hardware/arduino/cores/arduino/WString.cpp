@@ -64,7 +64,19 @@ String::String(unsigned char value, unsigned char base)
 {
 	init();
 	char buf[9];
-	utoa(value, buf, base);
+	switch (base) {
+		case 8:
+			sprintf(buf,"%o",value);
+			break;
+		case 10:
+			sprintf(buf,"%d",value);
+			break;
+		case 16:
+			sprintf(buf,"%x",value);
+			break;
+		default:
+			break;
+	}
 	*this = buf;
 }
 
@@ -72,7 +84,19 @@ String::String(int value, unsigned char base)
 {
 	init();
 	char buf[18];
-	itoa(value, buf, base);
+	switch (base) {
+		case 8:
+			sprintf(buf,"%o",value);
+			break;
+		case 10:
+			sprintf(buf,"%d",value);
+			break;
+		case 16:
+			sprintf(buf,"%x",value);
+			break;
+		default:
+			break;
+	}
 	*this = buf;
 }
 
@@ -80,7 +104,19 @@ String::String(unsigned int value, unsigned char base)
 {
 	init();
 	char buf[17];
-	utoa(value, buf, base);
+	switch (base) {
+		case 8:
+			sprintf(buf,"%o",value);
+			break;
+		case 10:
+			sprintf(buf,"%d",value);
+			break;
+		case 16:
+			sprintf(buf,"%x",value);
+			break;
+		default:
+			break;
+	}
 	*this = buf;
 }
 
@@ -88,7 +124,19 @@ String::String(long value, unsigned char base)
 {
 	init();
 	char buf[34];
-	ltoa(value, buf, base);
+	switch (base) {
+		case 8:
+			sprintf(buf,"%lo",value);
+			break;
+		case 10:
+			sprintf(buf,"%ld",value);
+			break;
+		case 16:
+			sprintf(buf,"%lx",value);
+			break;
+		default:
+			break;
+	}
 	*this = buf;
 }
 
@@ -96,23 +144,22 @@ String::String(unsigned long value, unsigned char base)
 {
 	init();
 	char buf[33];
-	ultoa(value, buf, base);
+	switch (base) {
+		case 8:
+			sprintf(buf,"%lo",value);
+			break;
+		case 10:
+			sprintf(buf,"%ld",value);
+			break;
+		case 16:
+			sprintf(buf,"%lx",value);
+			break;
+		default:
+			break;
+	}
 	*this = buf;
 }
 
-String::String(float value, int decimalPlaces)
-{
-	init();
-	char buf[33];
-	*this = dtostrf(value, (decimalPlaces + 2), decimalPlaces, buf);
-}
-
-String::String(double value, int decimalPlaces)
-{
-	init();
-	char buf[33];
-	*this = dtostrf(value, (decimalPlaces + 2), decimalPlaces, buf);
-}
 String::~String()
 {
 	free(buffer);
@@ -264,50 +311,36 @@ unsigned char String::concat(char c)
 unsigned char String::concat(unsigned char num)
 {
 	char buf[4];
-	itoa(num, buf, 10);
+	sprintf(buf,"%d",num);
 	return concat(buf, strlen(buf));
 }
 
 unsigned char String::concat(int num)
 {
 	char buf[7];
-	itoa(num, buf, 10);
+	sprintf(buf,"%d",num);
 	return concat(buf, strlen(buf));
 }
 
 unsigned char String::concat(unsigned int num)
 {
 	char buf[6];
-	utoa(num, buf, 10);
+	sprintf(buf,"%d",num);
 	return concat(buf, strlen(buf));
 }
 
 unsigned char String::concat(long num)
 {
 	char buf[12];
-	ltoa(num, buf, 10);
+	sprintf(buf,"%ld",num);
 	return concat(buf, strlen(buf));
 }
 
 unsigned char String::concat(unsigned long num)
 {
 	char buf[11];
-	ultoa(num, buf, 10);
+	sprintf(buf,"%ld",num);
 	return concat(buf, strlen(buf));
-}
-
-unsigned char String::concat(float num)
-{
-	char buf[20];
-	char* string = dtostrf(num, 8, 6, buf);
-	return concat(string, strlen(string));
-}
-
-unsigned char String::concat(double num)
-{
-	char buf[20];
-	char* string = dtostrf(num, 8, 6, buf);
-	return concat(string, strlen(string));
 }
 
 /*********************************************/
@@ -370,19 +403,6 @@ StringSumHelper & operator + (const StringSumHelper &lhs, unsigned long num)
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, float num)
-{
-	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
-	if (!a.concat(num)) a.invalidate();
-	return a;
-}
-
-StringSumHelper & operator + (const StringSumHelper &lhs, double num)
-{
-	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
-	if (!a.concat(num)) a.invalidate();
-	return a;
-}
 /*********************************************/
 /*  Comparison                               */
 /*********************************************/
@@ -644,22 +664,6 @@ void String::replace(const String& find, const String& replace)
 	}
 }
 
-void String::remove(unsigned int index){
-	if (index >= len) { return; }
-	int count = len - index;
-	remove(index, count);
-}
-
-void String::remove(unsigned int index, unsigned int count){
-	if (index >= len) { return; }
-	if (count <= 0) { return; }
-	if (index + count > len) { count = len - index; }
-	char *writeTo = buffer + index;
-	len = len - count;
-	strncpy(writeTo, buffer + index + count,len - index);
-	buffer[len] = 0;
-}
-
 void String::toLowerCase(void)
 {
 	if (!buffer) return;
@@ -699,8 +703,3 @@ long String::toInt(void) const
 }
 
 
-float String::toFloat(void) const
-{
-	if (buffer) return float(atof(buffer));
-	return 0;
-}
